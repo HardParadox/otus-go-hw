@@ -15,8 +15,6 @@ func Top10(value string) []string {
 		return []string{}
 	}
 
-	arrayOfTop10Words := make([]string, 10)
-
 	splitedString := strings.Fields(value)
 
 	dictionaryWithCountOfWord := countWords(splitedString)
@@ -31,7 +29,17 @@ func Top10(value string) []string {
 		return arrayWords[i].counter > arrayWords[j].counter
 	})
 
-	for index, word := range arrayWords[:10] {
+	var shortArrayWords []wordInArray
+
+	if len(arrayWords) > 10 {
+		shortArrayWords = arrayWords[:10]
+	} else {
+		shortArrayWords = arrayWords
+	}
+
+	arrayOfTop10Words := make([]string, len(shortArrayWords))
+
+	for index, word := range shortArrayWords {
 		arrayOfTop10Words[index] = word.value
 	}
 
