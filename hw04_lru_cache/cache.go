@@ -81,7 +81,8 @@ func (l *lruCache) Clear() {
 }
 
 func (l *lruCache) purge() {
-	item := l.queue.Back()
-	delete(l.items, item.Value.(*Item).Key)
-	l.queue.Remove(item)
+	if item := l.queue.Back(); item != nil {
+		delete(l.items, item.Value.(*Item).Key)
+		l.queue.Remove(item)
+	}
 }
