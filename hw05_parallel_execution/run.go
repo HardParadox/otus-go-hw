@@ -26,6 +26,10 @@ func (e *ErrorsCounter) isLimitExceeded() bool {
 	e.RLock()
 	defer e.RUnlock()
 
+	if e.maxErrors == 0 {
+		return false
+	}
+
 	return e.count >= e.maxErrors
 }
 
