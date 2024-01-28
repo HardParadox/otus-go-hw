@@ -67,4 +67,43 @@ func TestRun(t *testing.T) {
 		require.Equal(t, runTasksCount, int32(tasksCount), "not all tasks were completed")
 		require.LessOrEqual(t, int64(elapsedTime), int64(sumTime/2), "tasks were run sequentially?")
 	})
+
+	t.Run("Good work with maxErrorsCount = 0", func(t *testing.T) {
+		tasks := []Task{}
+		workersCount := 5
+		maxErrorsCount := 0
+		maxTasks := 30
+
+		var runTasksCount int32
+
+		for i := 0; i < maxTasks; i++ {
+			tasks = append(tasks, func() error {
+				atomic.AddInt32(&runTasksCount, 1)
+				return nil
+			})
+		}
+
+		err := Run(tasks, workersCount, maxErrorsCount)
+
+		require.Nil(t, err, "should return nil if maxErrorsCount = 0")
+		require.Equal(t, int32(maxTasks), runTasksCount, "all tasks should be done")
+	})
+
+	t.Run("Empty slice", func(t *testing.T) {
+		workersCount := 5
+		maxErrorsCount := 1
+
+		err := Run([]Task{}, workersCount, maxErrorsCount)
+
+		require.NoError(t, err, "Empty slice is valid")
+	})
+
+	t.Run("Nil slice", func(t *testing.T) {
+		workersCount := 5
+		maxErrorsCount := 1
+
+		err := Run(nil, workersCount, maxErrorsCount)
+
+		require.NoError(t, err, "Nil slice is valid")
+	})
 }
