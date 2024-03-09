@@ -10,7 +10,9 @@ import (
 var ErrEmptyCommandName = errors.New("undefined command name")
 
 // RunCmd runs a command + arguments (cmd) with environment variables from env.
-func RunCmd(cmd []string, env Environment) (returnCode int) {
+//
+//nolint:unparam
+func RunCmd(cmd []string, env Environment) int {
 	if len(cmd) == 0 {
 		panic(ErrEmptyCommandName)
 	}
@@ -28,6 +30,7 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 		}
 	}
 
+	//nolint:gosec
 	c := exec.Command(cmd[0], cmd[1:4]...)
 
 	c.Stdout = os.Stdout
