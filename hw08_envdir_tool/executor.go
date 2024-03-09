@@ -1,13 +1,20 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 )
 
+var ErrEmptyCommandName = errors.New("undefined command name")
+
 // RunCmd runs a command + arguments (cmd) with environment variables from env.
 func RunCmd(cmd []string, env Environment) (returnCode int) {
+	if len(cmd) == 0 {
+		panic(ErrEmptyCommandName)
+	}
+
 	for key, value := range env {
 		if value.NeedRemove {
 			err := os.Unsetenv(key)
