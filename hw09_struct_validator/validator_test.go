@@ -2,8 +2,11 @@ package hw09structvalidator
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type UserRole string
@@ -39,13 +42,43 @@ type (
 func TestValidate(t *testing.T) {
 	tests := []struct {
 		in          interface{}
-		expectedErr error
+		expectedErr []error
 	}{
 		{
-			// Place your code here.
+			User{
+				ID:     "100",
+				Name:   "John",
+				Age:    16,
+				Email:  "test@test.ru",
+				Role:   "stuff",
+				Phones: []string{"5466", "65464584836"},
+				meta:   nil,
+			},
+			[]error{
+				ErrLenViolation,
+				ErrMinValueViolation,
+				ErrLenViolation,
+			},
 		},
-		// ...
-		// Place your code here.
+		{
+			App{
+				Version: "1234",
+			},
+			[]error{
+				ErrLenViolation,
+			},
+		},
+		{
+			Token{},
+			nil,
+		},
+		{
+			Response{
+				Code: 200,
+				Body: "test",
+			},
+			nil,
+		},
 	}
 
 	for i, tt := range tests {
@@ -53,8 +86,25 @@ func TestValidate(t *testing.T) {
 			tt := tt
 			t.Parallel()
 
-			// Place your code here.
-			_ = tt
+			err := Validate(tt.in)
+
+			var valErrs ValidationErrors
+
+			if errors.As(err, &valErrs) {
+				for i, err := range tt.expectedErr {
+					require.ErrorIs(t, valErrs[i].Err, err, "Validation error should be like expected")
+				}
+			}
 		})
 	}
+
+	t.Run("Should handle non struct value", func(t *testing.T) {
+		err := Validate(99999)
+		require.ErrorIs(t, err, ErrExpectedStruct)
+	})
+
+	t.Run("Should handle nil value", func(t *testing.T) {
+		err := Validate(nil)
+		require.ErrorIs(t, err, ErrExpectedStruct)
+	})
 }
